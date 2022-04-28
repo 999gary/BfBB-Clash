@@ -17,3 +17,9 @@ impl Default for GameState {
         }
     }
 }
+
+impl GameState {
+    pub fn reset_state(&mut self) {
+        self.spatulas.clear();
+    }
+}

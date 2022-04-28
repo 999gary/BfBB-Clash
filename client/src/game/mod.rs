@@ -6,7 +6,7 @@ pub use game_interface::{GameInterface, InterfaceError, InterfaceResult};
 
 use crate::dolphin::DolphinInterface;
 use clash::{
-    lobby::{GamePhase, SharedLobby},
+    lobby::SharedLobby,
     protocol::Message,
     PlayerId,
 };
@@ -89,7 +89,6 @@ fn update_from_network<T: GameInterface>(
                 if lobby.options.ng_plus {
                     let _ = game.unlock_powers();
                 }
-                lobby.game_phase = GamePhase::Playing;
                 gui_sender
                     .send((*player_id, lobby.clone()))
                     .expect("GUI has crashed and so will we");

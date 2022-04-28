@@ -32,9 +32,33 @@ impl Lobby {
         }
     }
 
+    pub fn reset_game(&mut self) {
+        self.shared.game_state.reset_state();
+        for (_, player) in self.shared.players.iter_mut() {
+            player.score = 0;
+        }
+    }
+
     pub fn start_game(&mut self) {
+        self.reset_game();
         self.shared.game_phase = GamePhase::Playing;
+        let _ = self.sender.send(Message::GameLobbyInfo {
+            lobby: self.shared.clone(),
+        });
         if self.sender.send(Message::GameBegin).is_err() {
+            log::warn!(
+                "Lobby {:#X} started with no players in lobby.",
+                self.shared.lobby_id
+            )
+        }
+    }
+
+    pub fn stop_game(&mut self) {
+        self.shared.game_phase = GamePhase::Setup;
+        let _ = self.sender.send(Message::GameLobbyInfo {
+            lobby: self.shared.clone(),
+        });
+        if self.sender.send(Message::GameEnd).is_err() {
             log::warn!(
                 "Lobby {:#X} started with no players in lobby.",
                 self.shared.lobby_id

@@ -147,7 +147,9 @@ async fn process_incoming(
         Message::GameCurrentRoom { room: _ } => todo!(),
         Message::GameForceWarp { room: _ } => todo!(),
         Message::GameItemCollected { item: _ } => todo!(),
-        Message::GameEnd => todo!(),
+        Message::GameEnd => {
+            // This message isn't supposed to do anything until the GUI gets updated.
+        }
         Message::GameLeave => todo!(),
     }
 

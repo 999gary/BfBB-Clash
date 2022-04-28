@@ -1,6 +1,5 @@
 use crate::state::State;
 use anyhow::Context;
-use clash::lobby::GamePhase;
 use clash::protocol::{self, Connection, Item, Message, ProtocolError};
 use clash::spatula::Spatula;
 use clash::PlayerId;
@@ -148,6 +147,7 @@ impl Client {
             Message::GameBegin => {
                 let state = &mut *self.state.write().unwrap();
                 let lobby = state.get_lobby(self.player_id)?;
+                //TODO: Check if we are already in game.
                 lobby.start_game();
             }
             Message::GameLeave => {
@@ -227,7 +227,7 @@ impl Client {
                             log::info!("Player {:#X} collected {spat:?}", self.player_id);
 
                             if spat == Spatula::TheSmallShallRuleOrNot {
-                                lobby.shared.game_phase = GamePhase::Finished;
+                                lobby.stop_game();
                             }
 
                             let message = Message::GameLobbyInfo {
