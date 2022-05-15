@@ -1,34 +1,59 @@
 on: 
   push:
-    branches:
-      - cargo-release
     tags:
       - "v*.*.*"
+
+name: Create Release
+
 jobs:
   release-matrix:
     strategy:
       matrix:
-        os: ["ubuntu-latest", "windows-latest"]
+        os: [ubuntu-latest, windows-latest]
+        include:
+        - os: ubuntu-latest
+          target: x86_64-unknown-linux-gnu
+        - os: windows-latest
+          target: x86_64-pc-windows-msvc
+          extension: .exe
 
     name: Build - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     steps:
-      name: Checkout
-      - uses: actions/checkout@v2
-      name: Install Rust
-      - uses: actions-rs/toolchain@v1
+      - name: Install C build-dependencies
+        if: startsWith(matrix.os, 'ubuntu')
+        run: |
+          sudo apt update -qq
+          sudo apt install -y libxcb-shape0-dev libxcb-xfixes0-dev
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
         with:
           profile: minimal
           toolchain: stable
           override: true
-      name: Build
-      - uses: actions-rs/cargo@v1
+      - name: Build
+        uses: actions-rs/cargo@v1
         with:
           command: build
           args: --release
-      name: Release
-      - uses: softprops/action-gh-release@v1
+      - name: Archive Client
+        uses: thedoctor0/zip-release@main
         with:
-          files: |
-            target/release/client*
-            target/release/server*
+          type: 'zip'
+          filename: ${{ format('clash-{0}-{1}.zip', github.ref_name, matrix.target) }}
+          path: ${{ format('client{0}', matrix.extension) }} 
+          directory: target/release
+      - name: Archive Server
+        uses: thedoctor0/zip-release@main
+        with:
+          type: 'zip'
+          filename: ${{ format('server-{0}-{1}.zip', github.ref_name, matrix.target) }}
+          path: ${{ format('server{0}', matrix.extension) }}
+          directory: target/release
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          prerelease: startsWith(github.ref_name, 'v0')
+          files: '*.zip'
