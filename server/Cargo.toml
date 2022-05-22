@@ -11,10 +11,3 @@ tag = false
 
 [dependencies]
 clash = { path="../clash" }
-tokio = { version = "1", features = ["rt", "rt-multi-thread", "io-util", "net", "macros", "sync"] }
-rand = "0.8.4"
-log = "0.4"
-env_logger = "0.9"
-
-anyhow = "1"
-thiserror = "1"
