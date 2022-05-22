@@ -9,10 +9,9 @@ BfBB Clash is a custom gamemode for SpongeBob SquarePants: Battle for Bikini Bot
 - With all players on the Main Menu the game will start automatically when the host starts a new game.
 
 ## Building From Source
+* Install [Rust](https://www.rust-lang.org/tools/install)
 
-The code is separated into three packages: client, server, and a shared library.
+The code is separated into three packages: the shared library `clash`, `client`, and `server`.
 With cargo from the project root:
-- `$ cargo build --all` Build all packages
-- `$ cargo build -p client` Build just the client
-- `$ cargo build -p server` Build just the server
-- `$ cargo build` Build just the shared library
+- `$ cargo build` Build all packages
+- `$ cargo build -p <package>` Build a single package

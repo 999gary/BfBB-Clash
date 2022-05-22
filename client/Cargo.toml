@@ -1,34 +1,13 @@
 [package]
 name = "client"
-version = "0.1.0"
+version = "0.1.2"
 edition = "2021"
 
-[features]
-console = []
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata.release]
+consolidate-commits = true
+publish = false
+shared-version = true
+tag = false
 
 [dependencies]
-clash = { path = ".." }
-eframe = "0.17"
-image = "0.24"
-tokio = { version = "1", features = ["rt", "rt-multi-thread", "io-util", "net", "macros", "sync"] }
-strum = "0.23"
-spin_sleep = "1"
-
-thiserror = "1"
-anyhow = "1"
-
-log = "0.4"
-env_logger = "0.9"
-
-#Memory Shenanigans
-process-memory = "0.4" # For reading external process memory
-proc-maps = "0.2" # For querying memory maps
-sysinfo = "0.23" # For getting PID by name
-
-[target.'cfg(windows)'.dependencies]
-winapi = "0.3"
-
-[target.'cfg(windows)'.build-dependencies]
-winres = "0.1"
+clash = { path = "../clash" }

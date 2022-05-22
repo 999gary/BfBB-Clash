@@ -1,5 +1,5 @@
 [package]
-name = "server"
+name = "clash"
 version = "0.1.2"
 edition = "2021"
 
@@ -7,7 +7,5 @@ edition = "2021"
 consolidate-commits = true
 publish = false
 shared-version = true
-tag = false
+tag-prefix = ""
 
-[dependencies]
-clash = { path="../clash" }
