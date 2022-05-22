@@ -56,4 +56,4 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           prerelease: startsWith(github.ref_name, 'v0')
-          files: '*.zip'
+          files: 'target/release/*.zip'
