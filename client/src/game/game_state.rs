@@ -75,6 +75,9 @@ impl GameStateExt for SharedLobby {
             }
             
             if let Some(spat_ref) = self.game_state.spatulas.get_mut(&spat) {
+                if spat_ref.tier != SpatulaTier::Golden {
+                    game.mark_task_complete(spat)?;
+                }
                 if spat_ref.tier == SpatulaTier::None {
                     if local_player.current_room == Some(spat.get_room()) {
                         // Sync collected spatulas
@@ -82,13 +85,10 @@ impl GameStateExt for SharedLobby {
                     }
                     continue;
                 }
-                if spat_ref.tier != SpatulaTier::Golden {
-                    game.mark_task_complete(spat)?;
-                }
             }
-
+            /*
             // Check menu for any potentially missed collection events
-            if game.is_task_complete(spat)? {
+            if game.is_task_complete(spat)? && !hack {
                 local_spat_state.insert(spat);
                 network_sender
                     .blocking_send(Message::GameItemCollected {
@@ -97,6 +97,7 @@ impl GameStateExt for SharedLobby {
                     .unwrap();
                 info!("Collected (from menu) {spat:?}");
             }
+            */
 
             // Skip spatulas that aren't in the current room
             if local_player.current_room != Some(spat.get_room()) {
