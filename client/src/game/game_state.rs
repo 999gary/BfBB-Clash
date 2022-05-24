@@ -68,8 +68,13 @@ impl GameStateExt for SharedLobby {
         // Check for newly collected spatulas
         for spat in Spatula::iter() {
             // Skip already collected spatulas
+
+            if local_spat_state.contains(&spat) {
+                continue;
+            }
+            
             if let Some(spat_ref) = self.game_state.spatulas.get_mut(&spat) {
-                if (spat_ref.tier == SpatulaTier::None) || local_spat_state.contains(&spat) {
+                if spat_ref.tier == SpatulaTier::None {
                     if local_player.current_room == Some(spat.get_room()) {
                         // Sync collected spatulas
                         game.collect_spatula(spat)?;
