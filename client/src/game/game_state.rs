@@ -74,7 +74,7 @@ impl GameStateExt for SharedLobby {
             }
             
             if let Some(spat_ref) = self.game_state.spatulas.get_mut(&spat) {
-                if spat_ref.tier == SpatulaTier::None {
+                if spat_ref.tier != SpatulaTier::Golden {
                     if local_player.current_room == Some(spat.get_room()) {
                         // Sync collected spatulas
                         game.collect_spatula(spat)?;
