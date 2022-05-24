@@ -180,7 +180,10 @@ impl GameInterface for DolphinInterface {
         Ok(u16::from_be(ptr.read()?) == 2)
     }
 
-    fn collect_spatula(&self, spatula: Spatula) -> InterfaceResult<()> {
+    fn collect_spatula(&self, spatula: Spatula, current_room: Option<Room>) -> InterfaceResult<()> {
+        if current_room != Some(spatula.get_room()) {
+            return Ok(());
+        }
         let handle = self.handle.ok_or(InterfaceError::Unhooked)?;
 
         // TODO: reduce magic numbers
@@ -219,7 +222,14 @@ impl GameInterface for DolphinInterface {
         Ok(())
     }
 
-    fn is_spatula_being_collected(&self, spatula: Spatula) -> InterfaceResult<bool> {
+    fn is_spatula_being_collected(
+        &self,
+        spatula: Spatula,
+        current_room: Option<Room>,
+    ) -> InterfaceResult<bool> {
+        if current_room != Some(spatula.get_room()) {
+            return Ok(false);
+        }
         let handle = self.handle.ok_or(InterfaceError::Unhooked)?;
 
         // TODO: reduce magic numbers
@@ -237,7 +247,11 @@ impl GameInterface for DolphinInterface {
         Ok(u32::from_be(ptr.read()?) & 4 != 0)
     }
 
-    fn set_lab_door(&self, value: u32) -> InterfaceResult<()> {
+    fn set_lab_door(&self, value: u32, current_room: Option<Room>) -> InterfaceResult<()> {
+        if current_room != Some(Room::ChumBucket) {
+            return Ok(());
+        }
+
         let ptr = DataMember::<u32>::new_offset(
             self.handle.ok_or(InterfaceError::Unhooked)?,
             self.base_address.ok_or(InterfaceError::Unhooked)?,

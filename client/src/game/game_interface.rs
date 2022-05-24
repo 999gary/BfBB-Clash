@@ -45,23 +45,24 @@ pub trait GameInterface {
     fn mark_task_complete(&self, spatula: Spatula) -> InterfaceResult<()>;
 
     /// True when `spatula` is shown as gold in the pause menu.
-    /// Calling this from outside the level that `spatula` is in is undefined behavior.
     fn is_task_complete(&self, spatula: Spatula) -> InterfaceResult<bool>;
 
     /// Collect a spatula in the world. This only removes the entity, it will not complete the task or increment the spatula
-    /// counter. Calling this from outside the level that `spatula` is in is undefined behavior.
+    /// counter.
     /// # Returns:
     /// `Ok(())` for [Kah-Rah-Tae](clash::spatula::Spatula::KahRahTae) and [The Small Shall Rule... Or Not](Spatula::TheSmallShallRuleOrNot)
     /// without writing memory.
-    fn collect_spatula(&self, spatula: Spatula) -> InterfaceResult<()>;
+    fn collect_spatula(&self, spatula: Spatula, current_room: Option<Room>) -> InterfaceResult<()>;
 
     /// True when `spatula`'s collected animation is playing
-    /// Calling this from outside the level that `spatula` is in is undefined behavior.
     /// # Returns:
     /// `Ok(false)` for [Kah-Rah-Tae](clash::spatula::Spatula::KahRahTae) and [The Small Shall Rule... Or Not](Spatula::TheSmallShallRuleOrNot)
-    fn is_spatula_being_collected(&self, spatula: Spatula) -> InterfaceResult<bool>;
+    fn is_spatula_being_collected(
+        &self,
+        spatula: Spatula,
+        current_room: Option<Room>,
+    ) -> InterfaceResult<bool>;
 
-    /// Changes the number of spatulas required to enter the Chum Bucket Lab. Calling this from outside of the Chum Bucket
-    /// is undefined behavior.
-    fn set_lab_door(&self, value: u32) -> InterfaceResult<()>;
+    /// Changes the number of spatulas required to enter the Chum Bucket Lab.
+    fn set_lab_door(&self, value: u32, current_room: Option<Room>) -> InterfaceResult<()>;
 }

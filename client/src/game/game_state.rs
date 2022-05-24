@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashSet;
 
 use crate::game::{GameInterface, InterfaceResult};
 use clash::game_state::SpatulaTier;
@@ -61,52 +61,32 @@ impl GameStateExt for SharedLobby {
         }
 
         // Set the cost to unlock the lab door
-        if local_player.current_room == Some(Room::ChumBucket) {
-            game.set_lab_door(self.options.lab_door_cost.into())?;
-        }
+        game.set_lab_door(self.options.lab_door_cost.into(), local_player.current_room)?;
 
         // Check for newly collected spatulas
         for spat in Spatula::iter() {
             // Skip already collected spatulas
-
             if local_spat_state.contains(&spat) {
                 game.mark_task_complete(spat)?;
-                game.collect_spatula(spat)?;
+                game.collect_spatula(spat, local_player.current_room)?;
                 continue;
             }
-            
-            if let Some(spat_ref) = self.game_state.spatulas.get_mut(&spat) {
+
+            if let Some(spat_ref) = self.game_state.spatulas.get(&spat) {
                 if spat_ref.tier != SpatulaTier::Golden {
                     game.mark_task_complete(spat)?;
                 }
                 if spat_ref.tier == SpatulaTier::None {
-                    if local_player.current_room == Some(spat.get_room()) {
-                        // Sync collected spatulas
-                        game.collect_spatula(spat)?;
-                    }
+                    // Sync collected spatulas
+                    game.collect_spatula(spat, local_player.current_room)?;
                     continue;
                 }
             }
-            /*
-            // Check menu for any potentially missed collection events
-            if game.is_task_complete(spat)? && !hack {
-                local_spat_state.insert(spat);
-                network_sender
-                    .blocking_send(Message::GameItemCollected {
-                        item: Item::Spatula(spat),
-                    })
-                    .unwrap();
-                info!("Collected (from menu) {spat:?}");
-            }
-            */
 
-            // Skip spatulas that aren't in the current room
-            if local_player.current_room != Some(spat.get_room()) {
-                continue;
-            }
+            // TODO: Is there a way to detect missed collections now?
 
             // Detect spatula collection events
-            if game.is_spatula_being_collected(spat)? {
+            if game.is_spatula_being_collected(spat, local_player.current_room)? {
                 local_spat_state.insert(spat);
                 network_sender
                     .blocking_send(Message::GameItemCollected {
