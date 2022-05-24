@@ -70,17 +70,20 @@ impl GameStateExt for SharedLobby {
             // Skip already collected spatulas
 
             if local_spat_state.contains(&spat) {
+                game.collect_spatula(spat)?;
                 continue;
             }
             
             if let Some(spat_ref) = self.game_state.spatulas.get_mut(&spat) {
-                if spat_ref.tier == SpatulaTier::None && local_player.current_room == Some(spat.get_room()) {
-                    // Sync collected spatulas
-                    game.collect_spatula(spat)?;
+                if spat_ref.tier == SpatulaTier::None {
+                    if local_player.current_room == Some(spat.get_room()) {
+                        // Sync collected spatulas
+                        game.collect_spatula(spat)?;
+                    }
+                    continue;
                 }
                 if spat_ref.tier != SpatulaTier::Golden {
                     game.mark_task_complete(spat)?;
-                    continue;
                 }
             }
 
