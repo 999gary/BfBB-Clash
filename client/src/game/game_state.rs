@@ -70,6 +70,7 @@ impl GameStateExt for SharedLobby {
             // Skip already collected spatulas
 
             if local_spat_state.contains(&spat) {
+                game.mark_task_complete(spat)?;
                 game.collect_spatula(spat)?;
                 continue;
             }
