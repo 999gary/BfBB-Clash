@@ -1,9 +1,11 @@
 use crate::state::State;
 use anyhow::Context;
+use clash::game_state::{SpatulaState, SpatulaTier};
 use clash::protocol::{self, Connection, Item, Message, ProtocolError};
 use clash::spatula::Spatula;
-use clash::PlayerId;
+use clash::{PlayerId, GAME_CONSTS};
 use std::collections::hash_map::Entry;
+use std::ops::IndexMut;
 use std::sync::{Arc, RwLock};
 use tokio::net::TcpStream;
 use tokio::select;
@@ -213,18 +215,31 @@ impl Client {
             Message::GameItemCollected { item } => {
                 let state = &mut *self.state.write().unwrap();
                 let lobby = state.get_lobby(self.player_id)?;
+                let tier_count = 3;
 
                 match item {
                     Item::Spatula(spat) => {
-                        if let Entry::Vacant(e) = lobby.shared.game_state.spatulas.entry(spat) {
-                            e.insert(Some(self.player_id));
-                            lobby
-                                .shared
-                                .players
-                                .get_mut(&self.player_id)
-                                .ok_or(ProtocolError::InvalidPlayerId(self.player_id))?
-                                .score += 1;
-                            log::info!("Player {:#X} collected {spat:?}", self.player_id);
+                        let e = match lobby.shared.game_state.spatulas.get_mut(&spat) {
+                            Some(spat) => spat,
+                            None => {
+                                log::info!("adding spat");
+                                lobby.shared.game_state.spatulas.insert(spat, SpatulaState::default());
+                                lobby.shared.game_state.spatulas.get_mut(&spat).unwrap()
+                            }
+                        };
+                        if e.tier != SpatulaTier::None {
+                            let mut score = lobby.shared.game_state.scores.get_mut(&self.player_id).unwrap_or(&mut 0).clone();
+                            score += GAME_CONSTS.spat_scores[e.tier.clone() as usize];
+                            lobby.shared.game_state.scores.insert(self.player_id, score);
+
+                            e.collection_vec.insert(e.tier.clone() as usize, Some(self.player_id.clone()));
+                            log::info!("Player {:#X} collected {spat:?} with tier {:?}", self.player_id, e.tier);
+
+                            //This probably could be better.
+                            e.tier = SpatulaTier::from(e.tier.clone() as i32 + 1);
+                            if e.tier.clone() as i32 >= tier_count {
+                                e.tier = SpatulaTier::None
+                            }
 
                             if spat == Spatula::TheSmallShallRuleOrNot {
                                 lobby.stop_game();

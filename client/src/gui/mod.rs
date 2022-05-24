@@ -4,11 +4,13 @@ mod player_widget;
 use crate::game::GameStateExt;
 
 use self::{game_menu::GameMenu, player_widget::PlayerUi};
+use clash::game_state::GameState;
 use clash::lobby::{GamePhase, LobbyOptions, SharedLobby};
 use clash::player::PlayerOptions;
 use clash::protocol::Message;
 use clash::PlayerId;
 use std::error::Error;
+use std::ops::Index;
 use std::sync::mpsc::Receiver;
 
 use eframe::egui::{
@@ -346,10 +348,11 @@ impl App for Clash {
                     .show(ctx, |ui| {
                         ui.add_space(PADDING);
                         // TODO: Cache this
-                        let mut values = self.lobby.players.values().collect::<Vec<_>>();
-                        values.sort_by(|&a, &b| a.menu_order.cmp(&b.menu_order));
-                        for player in values {
-                            ui.add(PlayerUi::new(player));
+                        let mut values = self.lobby.players.iter().collect::<Vec<_>>();
+                        values.sort_by(|&a, &b| a.1.menu_order.cmp(&b.1.menu_order));
+                        for (player_id, player) in values {
+                            let score = self.lobby.game_state.scores.get(player_id).unwrap_or(&0).clone();
+                            ui.add(PlayerUi::new(player, score));
                         }
                     });
                 CentralPanel::default().show(ctx, |ui| {

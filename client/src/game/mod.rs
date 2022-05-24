@@ -3,16 +3,17 @@ mod game_state;
 
 pub use self::game_state::GameStateExt;
 pub use game_interface::{GameInterface, InterfaceError, InterfaceResult};
+use strum::EnumCount;
 
 use crate::dolphin::DolphinInterface;
 use clash::{
     lobby::SharedLobby,
     protocol::Message,
-    PlayerId,
+    PlayerId, spatula::Spatula,
 };
 use log::error;
 use spin_sleep::LoopHelper;
-use std::sync::mpsc::{Receiver, Sender};
+use std::{sync::mpsc::{Receiver, Sender}, collections::HashSet};
 
 pub fn start_game(
     mut gui_sender: Sender<(PlayerId, SharedLobby)>,
@@ -28,6 +29,10 @@ pub fn start_game(
     let _ = game.hook();
     let mut player_id = 0;
     let mut lobby = None;
+    // Not sure if this is the best approach, the idea is that it would be faster 
+    // to store a local state of what we as a client have collected rather
+    // than searching to see if we've collected it.
+    let mut local_spat_state = HashSet::<Spatula>::with_capacity(Spatula::COUNT);
 
     loop {
         loop_helper.loop_start();
@@ -46,7 +51,7 @@ pub fn start_game(
 
         if let Some(lobby) = lobby.as_mut() {
             if let Err(InterfaceError::Unhooked) =
-                lobby.update(player_id, &game, &mut network_sender)
+                lobby.update(player_id, &game, &mut network_sender, &mut local_spat_state)
             {
                 // We lost dolphin
                 || -> Option<()> {

@@ -1,9 +1,9 @@
 use std::collections::HashMap;
 
-use clash::spatula::Spatula;
+use clash::{spatula::Spatula, PlayerId};
 
 pub struct GameState {
-    pub spatulas: HashMap<Spatula, Option<usize>>,
+    pub spatulas: HashMap<Spatula, Option<PlayerId>>,
 }
 
 impl Default for GameState {

@@ -1,19 +1,22 @@
-use clash::{player::SharedPlayer, room::Room};
+use std::ops::Index;
+
+use clash::{player::SharedPlayer, room::Room, game_state::GameState};
 use eframe::egui::{Response, Sense, Stroke, TextStyle, Ui, Vec2, Widget};
 
 pub struct PlayerUi<'a> {
     player: &'a SharedPlayer,
+    score: u32,
 }
 
 impl<'a> PlayerUi<'a> {
-    pub fn new(player: &'a SharedPlayer) -> Self {
-        Self { player }
+    pub fn new(player: &'a SharedPlayer, score: u32) -> Self {
+        Self { player, score }
     }
 }
 
 impl<'a> Widget for PlayerUi<'a> {
     fn ui(self, ui: &mut Ui) -> Response {
-        let PlayerUi { player } = self;
+        let PlayerUi { player, score } = self;
         let color = player.options.color();
 
         // Use individual layouts instead of a single one to be able to add padding between each line
@@ -25,7 +28,7 @@ impl<'a> Widget for PlayerUi<'a> {
             color,
         );
         let score_galley = ui.painter().layout_no_wrap(
-            format!("Spatulas: {}", player.score),
+            format!("Score: {}", score),
             TextStyle::Body.resolve(ui.style()),
             color,
         );

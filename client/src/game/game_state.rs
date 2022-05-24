@@ -1,4 +1,7 @@
+use std::collections::{HashMap, HashSet};
+
 use crate::game::{GameInterface, InterfaceResult};
+use clash::game_state::SpatulaTier;
 use clash::lobby::{GamePhase, SharedLobby};
 use clash::PlayerId;
 use clash::{
@@ -17,6 +20,7 @@ pub trait GameStateExt {
         player_id: PlayerId,
         game: &T,
         network_sender: &mut tokio::sync::mpsc::Sender<Message>,
+        local_spat_state: &mut HashSet<Spatula>,
     ) -> InterfaceResult<()>;
 
     fn can_start(&self) -> bool;
@@ -29,6 +33,7 @@ impl GameStateExt for SharedLobby {
         player_id: PlayerId,
         game: &T,
         network_sender: &mut tokio::sync::mpsc::Sender<Message>,
+        local_spat_state: &mut HashSet<Spatula>,
     ) -> InterfaceResult<()> {
         if game.is_loading()? {
             return Ok(());
@@ -63,18 +68,20 @@ impl GameStateExt for SharedLobby {
         // Check for newly collected spatulas
         for spat in Spatula::iter() {
             // Skip already collected spatulas
-            if self.game_state.spatulas.contains_key(&spat) {
-                if local_player.current_room == Some(spat.get_room()) {
-                    // Sync collected spatulas
-                    game.collect_spatula(spat)?;
+            if let Some(spat_ref) = self.game_state.spatulas.get_mut(&spat) {
+                if (spat_ref.tier == SpatulaTier::None) || local_spat_state.contains(&spat) {
+                    if local_player.current_room == Some(spat.get_room()) {
+                        // Sync collected spatulas
+                        game.collect_spatula(spat)?;
+                    }
+                    game.mark_task_complete(spat)?;
+                    continue;
                 }
-                game.mark_task_complete(spat)?;
-                continue;
             }
 
             // Check menu for any potentially missed collection events
             if game.is_task_complete(spat)? {
-                self.game_state.spatulas.insert(spat, None);
+                local_spat_state.insert(spat);
                 network_sender
                     .blocking_send(Message::GameItemCollected {
                         item: Item::Spatula(spat),
@@ -90,7 +97,7 @@ impl GameStateExt for SharedLobby {
 
             // Detect spatula collection events
             if game.is_spatula_being_collected(spat)? {
-                self.game_state.spatulas.insert(spat, None);
+                local_spat_state.insert(spat);
                 network_sender
                     .blocking_send(Message::GameItemCollected {
                         item: Item::Spatula(spat),

@@ -22,7 +22,6 @@ pub struct PlayerOptions {
 pub struct SharedPlayer {
     pub options: PlayerOptions,
     pub current_room: Option<Room>,
-    pub score: u8,
     pub menu_order: u8,
 }
 
@@ -31,7 +30,6 @@ impl SharedPlayer {
         Self {
             options,
             current_room: None,
-            score: 0,
             menu_order,
         }
     }

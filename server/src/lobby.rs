@@ -34,9 +34,6 @@ impl Lobby {
 
     pub fn reset_game(&mut self) {
         self.shared.game_state.reset_state();
-        for (_, player) in self.shared.players.iter_mut() {
-            player.score = 0;
-        }
     }
 
     pub fn start_game(&mut self) {

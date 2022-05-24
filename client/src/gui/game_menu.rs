@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use clash::{game_state::GameState, player::SharedPlayer, spatula::Spatula, PlayerId};
+use clash::{game_state::{GameState, SpatulaState}, player::SharedPlayer, spatula::Spatula, PlayerId};
 use eframe::{
     egui::{Color32, Response, Sense, Ui, Widget},
     epaint::Vec2,
@@ -31,15 +31,9 @@ impl<'a> Widget for GameMenu<'a> {
             ui.allocate_exact_size(desired_size, Sense::focusable_noninteractive());
 
         for spat in Spatula::iter() {
-            let color = if let Some(Some(i)) = self.game.spatulas.get(&spat) {
-                self.players
-                    .get(i)
-                    .map(|p| p.options.color())
-                    .unwrap_or_default()
-            } else {
-                Color32::from_rgb(50, 50, 50)
-            };
-
+            let mut spat_state = self.game.spatulas.get(&spat).unwrap_or(&SpatulaState::default()).clone();
+            let color = spat_state.tier.get_color();
+            let color = Color32::from_rgb(color.0, color.1, color.2);
             let (y, x) = spat.into();
             ui.painter().circle_filled(
                 (
