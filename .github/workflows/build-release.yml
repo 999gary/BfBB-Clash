@@ -1,7 +1,7 @@
 on: 
   push:
     branch:
-      - main
+      - testrelease
     tags:
       - v*.*.*
 
