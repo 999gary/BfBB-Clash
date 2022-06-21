@@ -1,7 +1,9 @@
 on: 
   push:
+    branch:
+      - main
     tags:
-      - "v*.*.*"
+      - v*.*.*
 
 name: Create Release
 
@@ -19,6 +21,7 @@ jobs:
 
     name: Build - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    if: ${{ github.ref_type == 'tag' && github.event.base_ref=='refs/heads/main' }}
     steps:
       - name: Install C build-dependencies
         if: startsWith(matrix.os, 'ubuntu')
