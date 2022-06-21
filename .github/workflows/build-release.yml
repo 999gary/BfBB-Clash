@@ -1,7 +1,7 @@
 on: 
   push:
     branch:
-      - testrelease
+      - cargo-release
     tags:
       - v*.*.*
 
@@ -21,7 +21,7 @@ jobs:
 
     name: Build - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    if: ${{ github.ref_type == 'tag' && github.event.base_ref=='refs/heads/main' }}
+    if: ${{ github.ref_type == 'tag' && github.event.base_ref=='refs/heads/cargo-release' }}
     steps:
       - name: Install C build-dependencies
         if: startsWith(matrix.os, 'ubuntu')
