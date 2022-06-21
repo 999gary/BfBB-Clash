@@ -4,18 +4,18 @@ version = 3
 
 [[package]]
 name = "clash"
-version = "0.1.4"
+version = "0.1.5"
 
 [[package]]
 name = "client"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "clash",
 ]
 
 [[package]]
 name = "server"
-version = "0.1.4"
+version = "0.1.5"
 dependencies = [
  "clash",
 ]
